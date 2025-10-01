@@ -1,0 +1,5 @@
+plugin: hetzner.hcloud.hcloud
+api_token: "{{ vault_hetzner_token }}"
+keyed_groups:
+  - key: hcloud_labels.role
+    prefix: role

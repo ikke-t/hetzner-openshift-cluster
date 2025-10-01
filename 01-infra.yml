@@ -1,0 +1,105 @@
+---
+- name: ensure bastion and infra
+  hosts: localhost
+  connection: local
+  module_defaults:
+    group/hetzner.hcloud.all:
+      api_token: "{{ vault_hetzner_token }}"
+
+  tasks:
+    - name: Create vSwitch
+      community.hrobot.v_switch:
+        name: ocp-vswitch
+        vlan: 4000
+        hetzner_user: "{{ vault_hetzner_user }}"
+        hetzner_password: "{{ vault_hetzner_pw }}"
+        state: present
+      register: robot_vswitch_result
+
+    - name: Get vSwitch ID
+      set_fact:
+        vswitch_id: "{{ robot_vswitch_result.v_switch.id }}"
+
+    - name: Ensure a ocp-network
+      hetzner.hcloud.network:
+        name: ocp-network
+        ip_range: 10.0.0.0/22
+        state: present
+
+    - name: Ensure subnet for controllers
+      hetzner.hcloud.subnetwork:
+        network: ocp-network
+        ip_range: 10.0.0.0/24
+        network_zone: eu-central
+        type: cloud
+        vswitch_id: "{{ vswitch_id }}"
+        state: present
+
+    - name: Create vSwitch network
+      hetzner.hcloud.subnetwork:
+        network: ocp-network
+        ip_range: 10.0.1.0/24
+        network_zone: eu-central
+        type: vswitch
+        vswitch_id: "{{ vswitch_id }}"
+        state: present
+
+    - name: Ensure SSH key
+      hetzner.hcloud.ssh_key:
+        name: hetzner-admin
+        public_key: "{{ ssh_admin_key }}"
+        state: present
+
+    - name: Create a firewall for bastion
+      hetzner.hcloud.firewall:
+        name: bastion-firewall
+        rules:
+          - description: allow icmp from everywhere
+            direction: in
+            protocol: icmp
+            source_ips:
+              - 0.0.0.0/0
+              - ::/0
+          - description: allow ssh
+            direction: in
+            protocol: tcp
+            port: 22
+            source_ips:
+              - 0.0.0.0/0
+              - ::/0
+        state: present
+
+    - name: Create bastion
+      hetzner.hcloud.server:
+        name: bastion
+        server_type: cpx11
+        datacenter: hel1-dc2
+        image: centos-stream-10
+        ssh_keys:
+          - hetzner-admin
+        firewalls:
+          - bastion-firewall
+        labels:
+          role: bastion
+        state: started
+      register: bastion_vm
+
+    - name: Attach bastion to ocp-controllers subnetwork
+      hetzner.hcloud.server_network:
+        network: ocp-network
+        server: bastion
+        ip: 10.0.0.10
+        state: present
+
+    - name: Refresh inventory to get access to servers
+      meta: refresh_inventory
+
+    - name: wait bastion
+      wait_for:
+        host: "{{ hostvars[groups['role_bastion'][0]]['hcloud_ipv4'] }}"
+        port: 22
+        delay: 2
+      delegate_to: localhost
+
+    - debug:
+        msg: "Bastion at: {{ hostvars[groups['role_bastion'][0]]['hcloud_ipv4'] }}"

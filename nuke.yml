@@ -1,0 +1,84 @@
+---
+- name: delete hetzner env
+  hosts: localhost
+  connection: local
+  module_defaults:
+    group/hetzner.hcloud.all:
+      api_token: "{{ vault_hetzner_token }}"
+  vars:
+    controllers:
+      - name: ctrl-1
+      - name: ctrl-2
+      - name: ctrl-3
+
+  tasks:
+
+    - name: Delete bastion
+      hetzner.hcloud.server:
+        name: bastion
+        datacenter: hel1-dc2
+        state: absent
+      ignore_errors: true
+
+    - name: Delete controllers
+      hetzner.hcloud.server:
+        name: "{{ item.name }}"
+        server_type: cpx11
+        # server_type: cpx41
+        datacenter: hel1-dc2
+        state: absent
+      loop: "{{ controllers }}"
+      ignore_errors: true
+
+    # - name: Delete vSwitch network
+    #   hetzner.hcloud.subnetwork:
+    #     network: ocp-network
+    #     ip_range: 10.0.1.0/24
+    #     network_zone: eu-central
+    #     type: vswitch
+    #     state: absent
+    #   ignore_errors: true
+
+    # - name: Delete vSwitch
+    #   community.hrobot.v_switch:
+    #     name: ocp-vswitch
+    #     hetzner_user: "{{ vault_hetzner_user }}"
+    #     hetzner_password: "{{ vault_hetzner_pw }}"
+    #     vlan: 4000
+    #     state: absent
+    #   ignore_errors: true
+
+    # - name: Delete a ocp-network
+    #   hetzner.hcloud.network:
+    #     name: ocp-network
+    #     state: absent
+    #   ignore_errors: true
+
+    - name: Delete SSH key
+      hetzner.hcloud.ssh_key:
+        name: hetzner-admin
+        public_key: "{{ ssh_admin_key }}"
+        state: absent
+      ignore_errors: true
+
+    - name: Delete a firewall for bastion
+      hetzner.hcloud.firewall:
+        name: bastion-firewall
+        state: absent
+      ignore_errors: true
+
+    - name: Delete LB
+      hetzner.hcloud.load_balancer:
+        name: Ingress-LB
+        location: hel1
+        state: absent
+      ignore_errors: true
+
+    - name: Delete placement group for controllers
+      hetzner.hcloud.placement_group:
+        name: controllers
+        type: spread
+        labels:
+          role: controller
+        state: absent
+      ignore_errors: true

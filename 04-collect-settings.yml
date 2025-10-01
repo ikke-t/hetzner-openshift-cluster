@@ -1,0 +1,63 @@
+---
+- name: Ensure controllers
+  hosts: localhost
+  connection: local
+  module_defaults:
+    group/hetzner.hcloud.all:
+      api_token: "{{ vault_hetzner_token }}"
+
+  tasks:
+
+    - name: Create config file base for the agent
+      ansible.builtin.copy:
+        dest: net-configs/agent-config-base.yaml
+        content: |
+          apiVersion: v1beta1
+          kind: AgentConfig
+          metadata:
+            name: ocp-hz
+          rendezvousIP: {{ hostvars[groups['role_controller'][0]]['hcloud_private_networks'][0]['ip'] }}
+          additionalNTPSources:
+          - ntp1.hetzner.de
+          - ntp2.hetzner.com
+          - ntp3.hetzner.net
+          hosts: 
+
+    - name: Create agent-config.yaml
+      ansible.builtin.assemble:
+        src: net-configs
+        dest: agent-config.yaml
+
+    - name: create install-config.yaml
+      ansible.builtin.copy:
+        dest: install-config.yaml
+        content: |
+          apiVersion: v1
+          baseDomain: {{ base_domain}}
+          compute:
+          - architecture: amd64 
+            hyperthreading: Enabled
+            name: worker
+            replicas: 0
+          controlPlane:
+            architecture: amd64
+            hyperthreading: Enabled
+            name: master
+            replicas: 3
+          metadata:
+            name: {{ cluster_name }}
+          networking:
+            clusterNetwork:
+            - cidr: 10.128.0.0/14
+              hostPrefix: 23
+            machineNetwork:
+            - cidr: 10.0.0.0/24
+            - cidr: 10.0.1.0/24
+            networkType: OVNKubernetes 
+            serviceNetwork:
+            - 172.30.0.0/16
+          platform:
+            none; {}
+          pullSecret: '{{ vault_pull_secret }}'
+          sshKey: '{{ ssh_admin_key }}'
+

@@ -1,0 +1,5 @@
+ssh_admin_key: <your ssh public key here>
+# you need to have dns domain for this where you publish *.apps and api LB addresses
+base_domain: example.com
+# name your cluster uses after base_domain
+cluster_name: hz
