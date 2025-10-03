@@ -16,6 +16,9 @@
           kind: AgentConfig
           metadata:
             name: ocp-hz
+          installation:
+            disabledHostValidations:
+            - insufficient_memory
           rendezvousIP: {{ hostvars[groups['role_controller'][0]]['hcloud_private_networks'][0]['ip'] }}
           additionalNTPSources:
           - ntp1.hetzner.de
