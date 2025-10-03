@@ -1,5 +1,5 @@
 ---
-- name: Ensure controllers
+- name: Configure Bastion with useful tools
   hosts: role_bastion
   module_defaults:
     group/hetzner.hcloud.all:
