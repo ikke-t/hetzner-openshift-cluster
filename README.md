@@ -14,6 +14,7 @@ Playbooks:
 * **[02-controllers](./02-controllers.yml)** - Sets up OCP controllers, and LB
 * **[03-probe-settings](./03-probe-settings.yml)** - Fetches settings needed for agent-install
 * **[04-collect-settings](./04-collect-settings.yml)** - Writes config files for agent-install
+* [bastion-setup](./bastion-setup.yml) - Optional handy utility to setup bastion for OCP install
 
 # Create Agent installer
 
