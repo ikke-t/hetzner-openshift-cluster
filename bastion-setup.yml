@@ -22,8 +22,10 @@
     - name: install handy packages
       dnf:
         name: 
+          - ansible-core
           - bind-utils
           - btop
+          - git-core
           - neovim
           - netcat
           - nmstate
@@ -58,11 +60,8 @@
       ansible.builtin.copy:
         src: "{{ item }}"
         remote_src: true
-        dest: /usr/bin/
-      # creates:
-      #   - /usr/bin/oc
-      #   - /usr/bin/kubectl
-      #   - /usr/bin/openshift-install
+        dest: /usr/local/bin/
+        mode: 0755
       with_items:
         - /opt/openshift-client/oc
         - /opt/openshift-client/kubectl
