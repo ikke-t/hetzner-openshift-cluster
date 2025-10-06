@@ -2,6 +2,8 @@
 - name: ensure bastion and infra
   hosts: localhost
   connection: local
+  vars:
+    use_vswitch: false
   module_defaults:
     group/hetzner.hcloud.all:
       api_token: "{{ vault_hetzner_token }}"
@@ -15,10 +17,12 @@
         hetzner_password: "{{ vault_hetzner_pw }}"
         state: present
       register: robot_vswitch_result
+      when: have_vswitch
 
     - name: Get vSwitch ID
       set_fact:
         vswitch_id: "{{ robot_vswitch_result.v_switch.id }}"
+      when: have_vswitch
 
     - name: Ensure a ocp-network
       hetzner.hcloud.network:
@@ -34,6 +38,7 @@
         type: cloud
         vswitch_id: "{{ vswitch_id }}"
         state: present
+      when: have_vswitch
 
     - name: Create vSwitch network
       hetzner.hcloud.subnetwork:
@@ -43,6 +48,7 @@
         type: vswitch
         vswitch_id: "{{ vswitch_id }}"
         state: present
+      when: have_vswitch
 
     - name: Ensure SSH key
       hetzner.hcloud.ssh_key:
