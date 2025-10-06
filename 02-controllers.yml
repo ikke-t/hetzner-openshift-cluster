@@ -79,57 +79,62 @@
           role: controller
         state: present
 
-    - name: Create a firewall for controllers intranet
-      hetzner.hcloud.firewall:
-        name: controller-firewall-intra
-        rules:
-          - description: allow tcp to intranet
-            direction: out
-            protocol: tcp
-            destination_ips:
-              - 10.0.0.0/23
-          - description: allow udp to intranet
-            direction: out
-            protocol: udp
-            destination_ips:
-              - 10.0.0.0/23
-          - description: allow TCP from intranet
-            direction: in
-            protocol: tcp
-            source_ips:
-              - 10.0.0.0/23
-          - description: allow UDP from intranet
-            direction: in
-            protocol: udp
-            source_ips:
-              - 10.0.0.0/23
-          - description: allow icmp from intranet
-            direction: in
-            protocol: icmp
-            source_ips:
-              - 10.0.0.0/23
-          - description: allow ssh
-            direction: in
-            protocol: tcp
-            port: 22
-            source_ips:
-              - 10.0.0.0/23
-        state: present
+    # Turns out hertzner firewall doesn't affect intranet
+    # If no outbound firewall rules are set, everything is allowed to intranet
+    # - name: Create a firewall for controllers intranet
+    #   hetzner.hcloud.firewall:
+    #     name: controller-firewall-intra
+    #     rules:
+    #       - description: allow tcp to intranet
+    #         direction: out
+    #         protocol: tcp
+    #         destination_ips:
+    #           - 10.0.0.0/23
+    #       - description: allow udp to intranet
+    #         direction: out
+    #         protocol: udp
+    #         destination_ips:
+    #           - 10.0.0.0/23
+    #       - description: allow TCP from intranet
+    #         direction: in
+    #         protocol: tcp
+    #         source_ips:
+    #           - 10.0.0.0/23
+    #
+    #       - description: allow UDP from intranet
+    #         direction: in
+    #         protocol: udp
+    #         source_ips:
+    #           - 10.0.0.0/23
+    #       - description: allow icmp from intranet
+    #         direction: in
+    #         protocol: icmp
+    #         source_ips:
+    #           - 10.0.0.0/23
+    #       - description: allow ssh
+    #         direction: in
+    #         protocol: tcp
+    #         port: 22
+    #         source_ips:
+    #           - 10.0.0.0/23
+    #     state: present
 
     - name: Create a firewall for controllers internet
       hetzner.hcloud.firewall:
         name: controller-firewall-internet
-        rules:
-          - description: allow tcp to internet
-            direction: out
-            protocol: tcp
-            destination_ips:
-              - 0.0.0.0/0
-          - description: allow udp to internet
-            direction: out
-            protocol: udp
-            destination_ips:
-              - 0.0.0.0/0
+        # If no outbound firewall rules are set, everything is allowed to internet
+        # If no inbound rules, everything is dropped 
+    #     rules:
+    #       - description: allow tcp to internet
+    #         direction: out
+    #         protocol: tcp
+    #         destination_ips:
+    #           - 0.0.0.0/0
+    #       - description: allow udp to internet
+    #         direction: out
+    #         protocol: udp
+    #         destination_ips:
+    #           - 0.0.0.0/0
         state: present
 
     - name: Create controllers
@@ -153,7 +158,7 @@
 
     - name: Apply a firewall to a list of servers
       hetzner.hcloud.firewall_resource:
-        firewall: controller-firewall
+        firewall: controller-firewall-internet
         label_selectors:
           - role=controller
         state: present
