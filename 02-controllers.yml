@@ -79,51 +79,57 @@
           role: controller
         state: present
 
-    - name: Create a firewall for controllers
+    - name: Create a firewall for controllers intranet
       hetzner.hcloud.firewall:
-        name: controller-firewall
+        name: controller-firewall-intra
         rules:
-          - description: allow icmp from everywhere
+          - description: allow tcp to intranet
+            direction: out
+            protocol: tcp
+            destination_ips:
+              - 10.0.0.0/23
+          - description: allow udp to intranet
+            direction: out
+            protocol: udp
+            destination_ips:
+              - 10.0.0.0/23
+          - description: allow TCP from intranet
+            direction: in
+            protocol: tcp
+            source_ips:
+              - 10.0.0.0/23
+          - description: allow UDP from intranet
+            direction: in
+            protocol: udp
+            source_ips:
+              - 10.0.0.0/23
+          - description: allow icmp from intranet
             direction: in
             protocol: icmp
             source_ips:
-              - 0.0.0.0/0
-              - ::/0
+              - 10.0.0.0/23
           - description: allow ssh
             direction: in
             protocol: tcp
             port: 22
             source_ips:
-              - 0.0.0.0/0
-              - ::/0
-          - description: allow api
-            direction: in
+              - 10.0.0.0/23
+        state: present
+
+    - name: Create a firewall for controllers internet
+      hetzner.hcloud.firewall:
+        name: controller-firewall-internet
+        rules:
+          - description: allow tcp to internet
+            direction: out
             protocol: tcp
-            port: 6443
-            source_ips:
+            destination_ips:
               - 0.0.0.0/0
-              - ::/0
-          - description: allow ingress http
-            direction: in
-            protocol: tcp
-            port: 80
-            source_ips:
+          - description: allow udp to internet
+            direction: out
+            protocol: udp
+            destination_ips:
               - 0.0.0.0/0
-              - ::/0
-          - description: allow ingress https
-            direction: in
-            protocol: tcp
-            port: 443
-            source_ips:
-              - 0.0.0.0/0
-              - ::/0
-          - description: allow machineconfig api
-            direction: in
-            protocol: tcp
-            port: 22623
-            source_ips:
-              - 0.0.0.0/0
-              - ::/0
         state: present
 
     - name: Create controllers

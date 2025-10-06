@@ -17,12 +17,12 @@
         hetzner_password: "{{ vault_hetzner_pw }}"
         state: present
       register: robot_vswitch_result
-      when: have_vswitch
+      when: use_vswitch
 
     - name: Get vSwitch ID
       set_fact:
         vswitch_id: "{{ robot_vswitch_result.v_switch.id }}"
-      when: have_vswitch
+      when: use_vswitch
 
     - name: Ensure a ocp-network
       hetzner.hcloud.network:
@@ -36,9 +36,18 @@
         ip_range: 10.0.0.0/24
         network_zone: eu-central
         type: cloud
+        state: present
+      when: not use_vswitch
+
+    - name: Ensure subnet for controllers
+      hetzner.hcloud.subnetwork:
+        network: ocp-network
+        ip_range: 10.0.0.0/24
+        network_zone: eu-central
+        type: cloud
         vswitch_id: "{{ vswitch_id }}"
         state: present
-      when: have_vswitch
+      when: use_vswitch
 
     - name: Create vSwitch network
       hetzner.hcloud.subnetwork:
@@ -48,7 +57,7 @@
         type: vswitch
         vswitch_id: "{{ vswitch_id }}"
         state: present
-      when: have_vswitch
+      when: use_vswitch
 
     - name: Ensure SSH key
       hetzner.hcloud.ssh_key:
