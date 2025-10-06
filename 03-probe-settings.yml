@@ -29,8 +29,8 @@
             interfaces:
             - name: enp1s0
               macAddress: {{ ansible_eth0.macaddress }}
-            - name: enp7s0
-              macAddress: {{ ansible_eth1.macaddress }}
+            # - name: enp7s0
+            #   macAddress: {{ ansible_eth1.macaddress }}
             # rootDeviceHints: 
             #   deviceName: /dev/sda
             networkConfig: 
@@ -46,17 +46,17 @@
                   - ip: {{ ansible_eth0.ipv4.address }}
                     prefix-length: 32
                   dhcp: false
-              - name: enp7s0
-                type: ethernet
-                state: up
-                mac-address: {{ ansible_eth1.macaddress }} 
-                mtu: 1450
-                ipv4:
-                  enabled: true
-                  address:
-                  - ip: {{ ansible_eth1.ipv4.address }}
-                    prefix-length: 32
-                  dhcp: false
+              # - name: enp7s0
+              #   type: ethernet
+              #   state: up
+              #   mac-address: {{ ansible_eth1.macaddress }} 
+              #   mtu: 1450
+              #   ipv4:
+              #     enabled: true
+              #     address:
+              #     - ip: {{ ansible_eth1.ipv4.address }}
+              #       prefix-length: 32
+              #     dhcp: false
               dns-resolver:
                 config:
                   server:
@@ -74,13 +74,13 @@
                   next-hop-interface: enp1s0
                   table-id: 254
                 # bridge via device
-                - destination: 10.0.0.1/32
-                  next-hop-address: 10.0.0.1
-                  next-hop-interface: enp7s0
-                  table-id: 254
-                # subnet and vswitch net via bridge
-                - destination: 10.0.0.0/22
-                  next-hop-address: 10.0.0.1
-                  next-hop-interface: enp7s0
-                  table-id: 254
+                # - destination: 10.0.0.1/32
+                #   next-hop-address: 10.0.0.1
+                #   next-hop-interface: enp7s0
+                #   table-id: 254
+                # # subnet and vswitch net via bridge
+                # - destination: 10.0.0.0/22
+                #   next-hop-address: 10.0.0.1
+                #   next-hop-interface: enp7s0
+                #   table-id: 254
 

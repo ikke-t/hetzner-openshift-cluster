@@ -16,7 +16,8 @@
           kind: AgentConfig
           metadata:
             name: ocp-hz
-          rendezvousIP: {{ hostvars[groups['role_controller'][0]]['hcloud_private_networks'][0]['ip'] }}
+          # rendezvousIP: {{ hostvars[groups['role_controller'][0]]['hcloud_private_networks'][0]['ip'] }}
+          rendezvousIP: {{ hostvars[groups['role_controller'][0]]['hcloud_ipv4'] }}"
           additionalNTPSources:
           - ntp1.hetzner.de
           - ntp2.hetzner.com
@@ -50,9 +51,9 @@
             clusterNetwork:
             - cidr: 10.128.0.0/14
               hostPrefix: 23
-            machineNetwork:
-            - cidr: 10.0.0.0/23
-            networkType: OVNKubernetes 
+            # machineNetwork:
+            # - cidr: 10.0.0.0/23
+            # networkType: OVNKubernetes 
             serviceNetwork:
             - 172.30.0.0/16
           platform:

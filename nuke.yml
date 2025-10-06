@@ -38,7 +38,7 @@
     #     type: vswitch
     #     state: absent
     #   ignore_errors: true
-
+    #
     # - name: Delete vSwitch
     #   community.hrobot.v_switch:
     #     name: ocp-vswitch
@@ -47,20 +47,20 @@
     #     vlan: 4000
     #     state: absent
     #   ignore_errors: true
-
+    #
     # - name: Delete a ocp-network
     #   hetzner.hcloud.network:
     #     name: ocp-network
     #     state: absent
     #   ignore_errors: true
 
-    - name: Delete SSH key
-      hetzner.hcloud.ssh_key:
-        name: hetzner-admin
-        public_key: "{{ ssh_admin_key }}"
-        state: absent
-      ignore_errors: true
-
+    # - name: Delete SSH key
+    #   hetzner.hcloud.ssh_key:
+    #     name: hetzner-admin
+    #     public_key: "{{ ssh_admin_key }}"
+    #     state: absent
+    #   ignore_errors: true
+    #
     - name: Delete a firewall for bastion
       hetzner.hcloud.firewall:
         name: bastion-firewall

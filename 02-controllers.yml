@@ -8,11 +8,11 @@
   vars:
     controllers:
       - name: ctrl-1
-        ip: 10.0.0.11
+        # ip: 10.0.0.11
       - name: ctrl-2
-        ip: 10.0.0.12
+        # ip: 10.0.0.12
       - name: ctrl-3
-        ip: 10.0.0.13
+        # ip: 10.0.0.13
 
   tasks:
 
@@ -25,12 +25,12 @@
         state: present
       register: lb_result
 
-    - name: Add LB to controller network
-      hetzner.hcloud.load_balancer_network:
-        network: ocp-network
-        load_balancer: Ingress-LB
-        ip: 10.0.0.2
-        state: present
+    # - name: Add LB to controller network
+    #   hetzner.hcloud.load_balancer_network:
+    #     network: ocp-network
+    #     load_balancer: Ingress-LB
+    #     ip: 10.0.0.2
+    #     state: present
 
     - name: Forward http ingress
       hetzner.hcloud.load_balancer_service:
@@ -68,7 +68,8 @@
         type: label_selector
         load_balancer: Ingress-LB
         label_selector: role=controller
-        use_private_ip: true
+        # use_private_ip: true
+        use_private_ip: false
         state: present
 
     - name: Create a placement group for controllers
@@ -145,20 +146,20 @@
         state: present
       loop: "{{ controllers }}"
 
-    - name: Apply a firewall to a list of servers
-      hetzner.hcloud.firewall_resource:
-        firewall: controller-firewall
-        label_selectors:
-          - role=controller
-        state: present
+    # - name: Apply a firewall to a list of servers
+    #   hetzner.hcloud.firewall_resource:
+    #     firewall: controller-firewall
+    #     label_selectors:
+    #       - role=controller
+    #     state: present
 
-    - name: Attach controllers to subnetwork
-      hetzner.hcloud.server_network:
-        network: ocp-network
-        server: "{{ item.name }}"
-        ip: "{{ item.ip }}"
-        state: present
-      loop: "{{ controllers }}"
+    # - name: Attach controllers to subnetwork
+    #   hetzner.hcloud.server_network:
+    #     network: ocp-network
+    #     server: "{{ item.name }}"
+    #     ip: "{{ item.ip }}"
+    #     state: present
+    #   loop: "{{ controllers }}"
 
     - name: Start servers
       hetzner.hcloud.server:
@@ -169,28 +170,28 @@
     - name: Refresh inventory to get access to servers
       meta: refresh_inventory
 
-    - name: Write inventory file for guests
-      ansible.builtin.copy:
-        dest: proxy-inventory.yml
-        content: |
-          [proxy]
-          bastion ansible_ssh_host={{ hostvars[groups['role_bastion'][0]]['hcloud_ipv4'] }}
-
-          [controllers]
-          ctrl-1 ansible_ssh_host={{ hostvars[groups['role_controller'][0]]['hcloud_private_networks'][0]['ip'] }}
-          ctrl-2 ansible_ssh_host={{ hostvars[groups['role_controller'][1]]['hcloud_private_networks'][0]['ip'] }}
-          ctrl-3 ansible_ssh_host={{ hostvars[groups['role_controller'][2]]['hcloud_private_networks'][0]['ip'] }}
-
-          [controllers:vars]
-          ansible_ssh_common_args='-o ProxyCommand="ssh -p 22 -W %h:%p -q root@"{{ hostvars[groups['role_bastion'][0]]['hcloud_ipv4'] }}'
+    # - name: Write inventory file for guests
+    #   ansible.builtin.copy:
+    #     dest: proxy-inventory.yml
+    #     content: |
+    #       [proxy]
+    #       bastion ansible_ssh_host={{ hostvars[groups['role_bastion'][0]]['hcloud_ipv4'] }}
+    #
+    #       [controllers]
+    #       ctrl-1 ansible_ssh_host={{ hostvars[groups['role_controller'][0]]['hcloud_private_networks'][0]['ip'] }}
+    #       ctrl-2 ansible_ssh_host={{ hostvars[groups['role_controller'][1]]['hcloud_private_networks'][0]['ip'] }}
+    #       ctrl-3 ansible_ssh_host={{ hostvars[groups['role_controller'][2]]['hcloud_private_networks'][0]['ip'] }}
+    #
+    #       [controllers:vars]
+    #       ansible_ssh_common_args='-o ProxyCommand="ssh -p 22 -W %h:%p -q root@"{{ hostvars[groups['role_bastion'][0]]['hcloud_ipv4'] }}'
 
     - debug:
         msg:
           - "bastion at: {{ hostvars[groups['role_bastion'][0]]['hcloud_ipv4'] }}"
           - "LB {{ lb_result.hcloud_load_balancer.name }} at: {{ lb_result.hcloud_load_balancer.ipv4_address }}"
-          - "ctrl-1 private at: {{ hostvars[groups['role_controller'][0]]['hcloud_private_networks'][0]['ip'] }}"
+          # - "ctrl-1 private at: {{ hostvars[groups['role_controller'][0]]['hcloud_private_networks'][0]['ip'] }}"
           - "ctrl-1 public at: {{ hostvars[groups['role_controller'][0]]['hcloud_ipv4'] }}"
-          - "ctrl-2 private at: {{ hostvars[groups['role_controller'][1]]['hcloud_private_networks'][0]['ip'] }}"
+          # - "ctrl-2 private at: {{ hostvars[groups['role_controller'][1]]['hcloud_private_networks'][0]['ip'] }}"
           - "ctrl-2 public at: {{ hostvars[groups['role_controller'][1]]['hcloud_ipv4'] }}"
-          - "ctrl-3 private at: {{ hostvars[groups['role_controller'][2]]['hcloud_private_networks'][0]['ip'] }}"
+          # - "ctrl-3 private at: {{ hostvars[groups['role_controller'][2]]['hcloud_private_networks'][0]['ip'] }}"
           - "ctrl-3 public at: {{ hostvars[groups['role_controller'][2]]['hcloud_ipv4'] }}"
