@@ -56,7 +56,7 @@
             serviceNetwork:
             - 172.30.0.0/16
           platform:
-            none; {}
+            none: {}
           pullSecret: '{{ vault_pull_secret }}'
           sshKey: '{{ ssh_admin_key }}'
 
