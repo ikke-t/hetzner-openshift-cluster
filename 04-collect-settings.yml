@@ -16,8 +16,7 @@
           kind: AgentConfig
           metadata:
             name: ocp-hz
-          # rendezvousIP: {{ hostvars[groups['role_controller'][0]]['hcloud_private_networks'][0]['ip'] }}
-          rendezvousIP: {{ hostvars[groups['role_controller'][0]]['hcloud_ipv4'] }}"
+          rendezvousIP: {{ hostvars[groups['role_controller'][0]]['hcloud_ipv4'] }}
           additionalNTPSources:
           - ntp1.hetzner.de
           - ntp2.hetzner.com
@@ -57,7 +56,7 @@
             serviceNetwork:
             - 172.30.0.0/16
           platform:
-            none; {}
+            none: {}
           pullSecret: '{{ vault_pull_secret }}'
           sshKey: '{{ ssh_admin_key }}'
 
