@@ -32,6 +32,7 @@
           - podman
           - tmux
           - yum-utils
+          - haproxy
         state: latest
 
     - name: Create install directories
@@ -67,6 +68,14 @@
         - /opt/openshift-client/kubectl
         - /opt/openshift-install/openshift-install
 
+    - name: Enable forward in future
+      ansible.builtin.copy:
+        dest: /etc/sysctl.d/1000-ip-forward.conf
+        content: net.ipv4.ip_forward = 1
+
+    - name: Enable forward now
+      ansible.builtin.command: sysctl -p
+
     - name: Reboot required
       command: "/usr/bin/needs-restarting -r"
       register: reboot_required
@@ -87,4 +96,10 @@
         delay: 2
       delegate_to: localhost
       when: reboot_required.rc == 1
+
+    - name: Allow forwarding
+      ansible.builtin.command: iptables -A FORWARD -i enp7s0 -o enp1s0 -s 10.0.0.0/23  -p tcp -j ACCEPT
+
+    - name: Allow forwarding
+      ansible.builtin.command: iptables -t nat -A POSTROUTING -o enp1s0 -j MASQUERADE
 

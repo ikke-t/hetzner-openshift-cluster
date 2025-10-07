@@ -9,11 +9,6 @@
 
   tasks:
 
-    - debug:
-        msg: 
-          - "ip: {{ ansible_eth0.ipv4.address }} - mac: {{ ansible_eth0.macaddress }}"
-          - "ip: {{ ansible_eth1.ipv4.address }} - mac: {{ ansible_eth1.macaddress }}"
-
     - name: Create config snipplet dir
       delegate_to: localhost
       ansible.builtin.file:
@@ -27,34 +22,19 @@
         content: |2
           - hostname: {{ ansible_hostname }} 
             interfaces:
-            - name: enp1s0
-              macAddress: {{ ansible_eth0.macaddress }}
             - name: enp7s0
-              macAddress: {{ ansible_eth1.macaddress }}
-            # rootDeviceHints: 
-            #   deviceName: /dev/sda
+              macAddress: {{ ansible_eth0.macaddress }}
             networkConfig: 
               interfaces:
-              - name: enp1s0
-                type: ethernet
-                state: up
-                mac-address: {{ ansible_eth0.macaddress }} 
-                mtu: 1500
-                ipv4:
-                  enabled: true
-                  address:
-                  - ip: {{ ansible_eth0.ipv4.address }}
-                    prefix-length: 32
-                  dhcp: false
               - name: enp7s0
                 type: ethernet
                 state: up
-                mac-address: {{ ansible_eth1.macaddress }} 
+                mac-address: {{ ansible_eth0.macaddress }} 
                 mtu: 1450
                 ipv4:
                   enabled: true
                   address:
-                  - ip: {{ ansible_eth1.ipv4.address }}
+                  - ip: {{ ansible_eth0.ipv4.address }}
                     prefix-length: 32
                   dhcp: false
               dns-resolver:
@@ -62,17 +42,10 @@
                   server:
                   - 185.12.64.1
                   - 185.12.64.2
-                  # - 2a01:4ff:ff00::add:1
-                  # - 2a01:4ff:ff00::add:2
               routes:
                 config:
                 # hetzner network architecture at:
                 # https://docs.hetzner.com/cloud/networks/technical-concepts/architecture
-                # default via hetzner fixed ip
-                - destination: 0.0.0.0/0
-                  next-hop-address: 172.31.1.1
-                  next-hop-interface: enp1s0
-                  table-id: 254
                 # bridge via device
                 - destination: 10.0.0.1/32
                   next-hop-address: 10.0.0.1
@@ -83,4 +56,8 @@
                   next-hop-address: 10.0.0.1
                   next-hop-interface: enp7s0
                   table-id: 254
-
+                # default via bastion
+                - destination: 0.0.0.0/0
+                  next-hop-address: 10.0.0.1
+                  next-hop-interface: enp7s0
+                  table-id: 254
