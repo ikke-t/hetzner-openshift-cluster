@@ -27,3 +27,40 @@ mkdir agent; cd agent
 cp ../agent-config.yaml install-config.yaml .
 ./openshift-install --dir . agent create image
 ```
+
+# Three ways I tried
+
+Which all of them failed. I see the most promising would be the third option,
+if I had more time I'd look deeper into it. But now I need to do other stuff.
+The intranet would allow adding physical workers from the hetzner baremetal
+side later.
+
+![Hetzner OCP architecture](./hetzner-ocp-architecture.png)
+
+# Branch main: With public and private networking
+
+This was my first goal. Main branch has the setup that creates intranet for
+cluster internal comms. But since there is no router in intranet, I added
+public interfaces to each three masters to be able to download containers,
+operators and stuff from internet. The Hetzner LB is for the public access.
+
+This installed the ctrl-2 and ctrl-3 nodes, but they could not form the VXLAN
+for whatever reason. Cluster services failed due they can't talk to each other
+via the 172 -serviceNetwork. I suspect they try talking across the networks,
+from intra to public, which is not possible. Like not all the services would be
+bound to intranet. See failure.txt in branch.
+
+# Branch publicnet: Only using public facing interfaces
+
+I removed all the intranet connectivity, and set LB to point to public
+interfaces. This installation doesn't even get to point where it would start
+dumping stuff to disk. I added all firewall openings between the hosts. But for
+whatever reason it fails to start install. See failure.txt in branch.
+
+# Branch bastion-gw: Only private network, but bastion as gateway to internet
+
+I briefly tried this, and would perhaps continue this way. The downnside there
+is single point of failure of bastion, which I don't like so much. I didn't
+have enough time to set the forwarding working from nodes to internet via
+bastion. However this would be the next path to try, as OCP cluster is nicely
+isolated from internet.

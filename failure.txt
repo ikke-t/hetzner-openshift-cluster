@@ -1,0 +1,15 @@
+Failed to setup serviceNetwork:
+
+DEBUG Host ctrl-2: updated status from installing-in-progress to installed (Done)
+DEBUG Host: ctrl-2, reached installation stage Done
+DEBUG Host ctrl-3: updated status from installing-in-progress to installed (Done)
+DEBUG Host: ctrl-3, reached installation stage Done
+ERROR Cluster operator authentication Degraded is True with APIServerDeployment_UnavailablePod::IngressStateEndpoints_MissingSubsets::OAuthServerServiceEndpointAccessibleController_SyncError::OAuthServerServiceEndpointsEndpointAccessibleController_SyncError: APIServerDeploymentDegraded: 2 of 2 requested instances are unavailable for apiserver.openshift-oauth-apiserver (crashlooping container is waiting in apiserver-f489ffdb8-jfsbd pod, crashlooping container is waiting in apiserver-f489ffdb8-t6h8h pod)
+ERROR IngressStateEndpointsDegraded: No subsets found for the endpoints of oauth-server
+ERROR OAuthServerServiceEndpointAccessibleControllerDegraded: Get "https://172.30.146.120:443/healthz": dial tcp 172.30.146.120:443: connect: connection refused
+ERROR OAuthServerServiceEndpointsEndpointAccessibleControllerDegraded: oauth service endpoints are not ready
+INFO Cluster operator authentication Progressing is True with APIServerDeployment_PodsUpdating: APIServerDeploymentProgressing: deployment/apiserver.openshift-oauth-apiserver: 2/2 pods have been updated to the latest generation and 0/2 pods are available
+INFO Cluster operator authentication Available is False with APIServerDeployment_NoPod::APIServices_PreconditionNotReady::OAuthServerServiceEndpointAccessibleController_EndpointUnavailable::OAuthServerServiceEndpointsEndpointAccessibleController_ResourceNotFound: APIServerDeploymentAvailable: no apiserver.openshift-oauth-apiserver pods available on any node.
+INFO APIServicesAvailable: PreconditionNotReady
+INFO OAuthServerServiceEndpointAccessibleControllerAvailable: Get "https://172.30.146.120:443/healthz": dial tcp 172.30.146.120:443: connect: connection refused
+INFO OAuthServerServiceEndpointsEndpointAccessibleControllerAvailable: endpoints "oauth-openshift" not found
